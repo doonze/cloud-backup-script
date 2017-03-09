@@ -40,7 +40,7 @@ echo "-- Starting tarball of Main backup on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/bin/tar -cpbf /your/path/here/main_bk_$DATE.tar.bz2 /path/to/locationtotar
+/bin/tar -cpjf /your/path/here/main_bk_$DATE.tar.bz2 /path/to/locationtotar
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -137,7 +137,7 @@ echo "-- Starting tarball of PI backup on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/bin/tar -cpzf /path/to/tars/pi/pi_bk_$DATE.tar.gz /path/to/backups/pi_backup/
+/bin/tar -cpjf /path/to/tars/pi/pi_bk_$DATE.tar.bz2 /path/to/backups/pi_backup/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -182,7 +182,10 @@ echo "-- find starting delete of old Server changes on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-find /path/to/cleanup/server_changes/ -type d -ctime +7 -exec rm -dR {} +
+find /path/to/cleanup/server_changes/main -maxdepth 1 -type d -ctime +7 -exec rm -dR {} +
+find /path/to/cleanup/server_changes/pi -maxdepth 1 -type d -ctime +7 -exec rm -dR {} +
+find /path/to/cleanup/server_changes/mysql -maxdepth 1 -type d -ctime +7 -exec rm -dR {} +
+
 
 echo ""
 echo "----------------------------------------------------------------------"
@@ -214,7 +217,7 @@ echo "-- rclone starting transfer of Server Changes to ACD on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-rclone move /path/to/tars/changes/ remote:tars/changes/
+rclone move /path/to/tars/ remote:tars/changes/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
