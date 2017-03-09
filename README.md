@@ -1,7 +1,7 @@
 # cloud-backup-script
 This bash script uses rsync, tar, and rclone to create local and cloud backups.
 
-Needed: 
+Needed:   
 rsync   
 rclone  
 tar  
