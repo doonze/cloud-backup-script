@@ -1,0 +1,233 @@
+#!/bin/bash
+DATE=`date +%m.%d.%y`
+DOW=$(date +"%a")
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/justin/scripts
+
+# This script is designed to backup the main server, Pi server and Mysql databases
+# each day. Then once a week it chooses one backup to turn into a tarball and 
+# backup to the cloud. Monday: Main Server, Tuesday: Mysql database, 
+# Wednesday: Pi server, Thursday: Server Changes. If all goes well then we'll have 
+# a constant daily incremintal backup of the servers local, and a weekly snapshot 
+# in the cloud, with daily changes snapshot saved to the could as well. In case 
+# rclone failes to move the tars, it will keep trying to move all tars each week
+# till it gets them moved.
+
+# Start the rsync backup of main server
+
+echo "######################################################################"
+echo ""
+echo "----------------------------------------------------------------------"
+echo "-- rsync starting backup of Main on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+/usr/bin/rsync -aAXHhb --del --stats --backup-dir=/mnt/mybook/backups/server_changes/main/$DATE \
+--exclude-from=/home/justin/scripts/rsync_ex_bkup.txt / /mnt/mybook/backups/main_server_backup
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rsync finished backup of Main on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# If its monday we'll tar Main backup
+
+if [ "$DOW" = "Mon" ]
+then
+echo "----------------------------------------------------------------------"
+echo "-- It's Monday so we're going to tar up todays Main backup"
+echo "-- Starting tarball of Main backup on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+/bin/tar -cpbf /mnt/mybook/backups/tars/main/main_bk_$DATE.tar.bz2 /mnt/mybook/backups/main_server_backup/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ tar finished with Main on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# Since it is Monday, we will also rclone it up to amazon drive
+
+echo "----------------------------------------------------------------------"
+echo "-- rclone started transfer of Main to acd on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+rclone move /mnt/mybook/backups/tars/main/ remote:tars/main/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rclone finished transfer of Main to acd on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+else
+
+echo "=-=-=-=- It's not monday, so we're skipping tar and rclone of the main backup -=-=-=-="
+
+fi
+
+# Start backup of Mysql server files
+
+echo ""
+echo "----------------------------------------------------------------------"
+echo "-- rsync starting backup of Mysql on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+/usr/bin/rsync -ahb --del --stats --backup-dir=/mnt/mybook/backups/server_changes/mysql/$DATE \
+--exclude-from=/home/justin/scripts/rsync_ex_bkup.txt /mnt/media/mysql /mnt/mybook/backups/mysql_backup
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rsync finished backup of Mysql on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# If it's Tuesday we will tarball the mysql backup 
+
+if [ "$DOW" = "Tue" ]
+then
+echo "----------------------------------------------------------------------" 
+echo "-- It is Tuesday so we are going to tar up the mysql backup"
+echo "-- staring tarball of Mysql backup on $(date)" 
+echo "----------------------------------------------------------------------" 
+echo ""
+
+/bin/tar -cpjf /mnt/mybook/backups/tars/mysql/mysql_bk_$DATE.tar.bz2 /mnt/mybook/backups/mysql_backup/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ tar finished with mysql on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# If Tuesday we'll also rclone it over to acd.
+
+echo "----------------------------------------------------------------------"
+echo "-- rclone starting transfer of mysql to acd on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+rclone move /mnt/mybook/backups/tars/mysql/ remote:tars/mysql/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rclone finished transfer of mysql to acd on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+else
+
+echo "=-=-=-=- It's not Tuesday, so we're skipping tar and rclone of the mysql backup -=-=-=-="
+
+fi
+
+# If it is Wednesday then we'll tarball the PI Backup and send to acd.
+# since it's a seperate server we have no rsync work to do here on the main server
+
+if [ "$DOW" = "Wed" ]
+then
+
+echo ""
+echo "----------------------------------------------------------------------"
+echo "-- It is Wednesday so we're going to tar and transfer PI backup to acd"
+echo "-- Starting tarball of PI backup on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+/bin/tar -cpzf /mnt/mybook/backups/tars/pi/pi_bk_$DATE.tar.gz /mnt/mybook/backups/pi_backup/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ tarball of PI backup has finished on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# If Wednesday we'll send the tarball up to acd.
+
+echo "----------------------------------------------------------------------"
+echo "-- rclone starting transfer of PI Backup to ACD on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+rclone move /mnt/mybook/backups/tars/pi/ remote:tars/pi/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rclone finished transfer of Pi Backup on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+else
+
+echo "=-=-=-=- It's not Wednesday, so we're skipping tar and rclone of the PI backup -=-=-=-="
+
+fi
+
+# Thursday we'll tar up the last weeks server changes and send them off to acd.
+
+if [ "$DOW" = "Thu" ]
+then
+
+# First we'll remove everything that has already been backed up last week
+# to keep local disk clean. We'll keep this week on disk till next backup.
+# If things go as expected everyting is backed up in tars dir so there
+# is no risk. Even if rclone failed to move the tars this week, they are
+# in their own directory so are safe. So nothing is lost.
+
+echo "----------------------------------------------------------------------"
+echo "-- find starting delete of old Server changes on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+find /mnt/mybook/backups/server_changes/ -type d -ctime +7 -exec rm -dR {} +
+
+echo ""
+echo "----------------------------------------------------------------------"
+echo "-- find finished delete of Server changes on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+# If it's Thursday we tarball Server Changes
+
+echo ""
+echo "----------------------------------------------------------------------"
+echo "-- It is Thursday so we're going to tar and transfer Server Changes to acd"
+echo "-- Starting tarball of Server Changes on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+/bin/tar -cpbf /mnt/mybook/backups/tars/changes/changes_bk_$DATE.tar.bz2 /mnt/mybook/backups/server_changes/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ tarball of Server Changes has finished on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+# If it's Thursday we also send it off to acd.
+
+echo "----------------------------------------------------------------------"
+echo "-- rclone starting transfer of Server Changes to ACD on $(date)"
+echo "----------------------------------------------------------------------"
+echo ""
+
+rclone move /mnt/mybook/backups/tars/changes/ remote:tars/changes/
+
+echo ""
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "++ rclone finished transfer of Server Changes on $(date)"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""
+
+else
+
+echo "=-=-=-=- It's not Thursday, so we're skipping cleanup, tar and rclone of Server Changes -=-=-=-="
+
+fi
+
+echo ""
+echo "_+_+_+_+_+_+_+_+_+_+_ We are done backing up for today! _+_+_+_+_+_+_+_+_+_+_"
+echo ""

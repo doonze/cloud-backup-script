@@ -1,11 +1,11 @@
 # cloud-backup-script
 This script uses rsync, tar, and rclone to create local and cloud backups.
 
-Needed:
-rsync
-rclone
-tar
-find
+Needed: 
+rsync   
+rclone  
+tar  
+find  
 
 This script is designed to do several things. It first creates daily local copies of
 all servers and a mysql database. You don't need the mysql part unless you keep your

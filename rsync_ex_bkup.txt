@@ -1,0 +1,11 @@
+/dev/*
+/proc/*
+/sys/*
+/tmp/*
+/run/*
+/var/run/*
+/mnt/*
+/media/*
+/lost+found
+/var/lib/emby-server/cache/*
+
