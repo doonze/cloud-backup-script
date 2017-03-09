@@ -42,7 +42,7 @@ I've included a copy of the rsync exclude file I use in this repo.
  
 Here's the entry I use in crontab:
 
-0 9    * * *     root    /home/justin/scripts/rsync_main_bkup >> /var/log/rsync/main_server/rsync_main_serv.log 2>&1
+0 9    * * *     root    /home/justin/scripts/cloud-backup-script >> /var/log/rsync/main_server/cloud-backup-script.log 2>&1
 
 you'll likely have to create the log file location and give it correct permissions 
 for the cron to write to it. Since this script is pretty chatty (lots of output) I 

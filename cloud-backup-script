@@ -1,7 +1,7 @@
 #!/bin/bash
 DATE=`date +%m.%d.%y`
 DOW=$(date +"%a")
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/justin/scripts
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:
 
 # This script is designed to backup the main server, Pi server and Mysql databases
 # each day. Then once a week it chooses one backup to turn into a tarball and 
@@ -21,8 +21,8 @@ echo "-- rsync starting backup of Main on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/usr/bin/rsync -aAXHhb --del --stats --backup-dir=/mnt/mybook/backups/server_changes/main/$DATE \
---exclude-from=/home/justin/scripts/rsync_ex_bkup.txt / /mnt/mybook/backups/main_server_backup
+/usr/bin/rsync -aAXHhb --del --stats --backup-dir=/your/path/here/$DATE \
+--exclude-from=/your/path/here/ex_file.txt / /path/to/backup/location
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -40,7 +40,7 @@ echo "-- Starting tarball of Main backup on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/bin/tar -cpbf /mnt/mybook/backups/tars/main/main_bk_$DATE.tar.bz2 /mnt/mybook/backups/main_server_backup/
+/bin/tar -cpbf /your/path/here/main_bk_$DATE.tar.bz2 /path/to/locationtotar
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -55,7 +55,7 @@ echo "-- rclone started transfer of Main to acd on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-rclone move /mnt/mybook/backups/tars/main/ remote:tars/main/
+rclone move /your/path/here/tars/main/ remote:tars/main/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -76,8 +76,8 @@ echo "-- rsync starting backup of Mysql on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/usr/bin/rsync -ahb --del --stats --backup-dir=/mnt/mybook/backups/server_changes/mysql/$DATE \
---exclude-from=/home/justin/scripts/rsync_ex_bkup.txt /mnt/media/mysql /mnt/mybook/backups/mysql_backup
+/usr/bin/rsync -ahb --del --stats --backup-dir=your/path/here/$DATE \
+--exclude-from=/your/path/here/rsync_ex_bkup.txt /your/path/to/mysql /path/to/backup/to/mysql_backup
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -95,7 +95,7 @@ echo "-- staring tarball of Mysql backup on $(date)"
 echo "----------------------------------------------------------------------" 
 echo ""
 
-/bin/tar -cpjf /mnt/mybook/backups/tars/mysql/mysql_bk_$DATE.tar.bz2 /mnt/mybook/backups/mysql_backup/
+/bin/tar -cpjf /path/to/creat/tar/mysql_bk_$DATE.tar.bz2 /path/to/tar/from/backups/mysql_backup/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -110,7 +110,7 @@ echo "-- rclone starting transfer of mysql to acd on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-rclone move /mnt/mybook/backups/tars/mysql/ remote:tars/mysql/
+rclone move /path/to/tars/mysql/ remote:tars/mysql/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -137,7 +137,7 @@ echo "-- Starting tarball of PI backup on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/bin/tar -cpzf /mnt/mybook/backups/tars/pi/pi_bk_$DATE.tar.gz /mnt/mybook/backups/pi_backup/
+/bin/tar -cpzf /path/to/tars/pi/pi_bk_$DATE.tar.gz /path/to/backups/pi_backup/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -152,7 +152,7 @@ echo "-- rclone starting transfer of PI Backup to ACD on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-rclone move /mnt/mybook/backups/tars/pi/ remote:tars/pi/
+rclone move /path/to/backups/tars/pi/ remote:tars/pi/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -182,7 +182,7 @@ echo "-- find starting delete of old Server changes on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-find /mnt/mybook/backups/server_changes/ -type d -ctime +7 -exec rm -dR {} +
+find /path/to/cleanup/server_changes/ -type d -ctime +7 -exec rm -dR {} +
 
 echo ""
 echo "----------------------------------------------------------------------"
@@ -199,7 +199,7 @@ echo "-- Starting tarball of Server Changes on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/bin/tar -cpbf /mnt/mybook/backups/tars/changes/changes_bk_$DATE.tar.bz2 /mnt/mybook/backups/server_changes/
+/bin/tar -cpbf /path/to/tars/changes/changes_bk_$DATE.tar.bz2 /path/to/backups/server_changes/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -214,7 +214,7 @@ echo "-- rclone starting transfer of Server Changes to ACD on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-rclone move /mnt/mybook/backups/tars/changes/ remote:tars/changes/
+rclone move /path/to/tars/changes/ remote:tars/changes/
 
 echo ""
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
