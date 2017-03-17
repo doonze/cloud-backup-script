@@ -21,7 +21,7 @@ echo "-- rsync starting backup of Main on $(date)"
 echo "----------------------------------------------------------------------"
 echo ""
 
-/usr/bin/rsync -aAXHPhb --del --stats --backup-dir=/your/path/here/$DATE \
+/usr/bin/rsync -aAXHhb --del --stats --backup-dir=/your/path/here/$DATE \
 --exclude-from=/your/path/here/ex_file.txt / /path/to/backup/location
 
 echo ""
